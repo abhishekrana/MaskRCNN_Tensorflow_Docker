@@ -59,6 +59,7 @@ function setup_docker_env(){
 	elif [[ $1 == 'gpu' ]];then
 		DOCKER='nvidia-docker'
 		IMAGE_ID='gcr.io/tensorflow/tensorflow:latest-gpu'
+		#IMAGE_ID=85c8f551e1d2
 
 		# Install nvidia-docker and nvidia-docker-plugin
 		wget -P /tmp https://github.com/NVIDIA/nvidia-docker/releases/download/v1.0.1/nvidia-docker_1.0.1-1_amd64.deb
@@ -77,8 +78,9 @@ function setup_docker_env(){
 	sudo $DOCKER rm $CONTAINER_NAME
 
 	# Create docker container
-	sudo $DOCKER run -d --name $CONTAINER_NAME $IMAGE_ID
+	sudo $DOCKER run -d -v maskrcnn:$DCR_ROOT_PATH --name $CONTAINER_NAME $IMAGE_ID
 
+	exit 0
 	# Install dependencies
 	sudo $DOCKER exec -it $CONTAINER_NAME apt-get update
 	sudo $DOCKER exec -it $CONTAINER_NAME apt-get -y install git
