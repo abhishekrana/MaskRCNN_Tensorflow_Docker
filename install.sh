@@ -80,7 +80,6 @@ function setup_docker_env(){
 	# Create docker container
 	sudo $DOCKER run -d -v maskrcnn:$DCR_ROOT_PATH --name $CONTAINER_NAME $IMAGE_ID
 
-	exit 0
 	# Install dependencies
 	sudo $DOCKER exec -it $CONTAINER_NAME apt-get update
 	sudo $DOCKER exec -it $CONTAINER_NAME apt-get -y install git
