@@ -134,7 +134,7 @@ function run_maskrcnn(){
 ##### MAIN #####
 
 # DOCKER
-echo -n "Install/Update Docker for Ubunt 16.04 [y/n] ? "
+echo -n "Install/Update Docker (Ubuntu 16.04) [y/n] ? "
 read input
 if [[ $input == 'y' ]] || [[ $input == 'Y' ]];then
 	install_docker
