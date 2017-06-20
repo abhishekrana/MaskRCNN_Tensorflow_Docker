@@ -1,6 +1,6 @@
 # MaskRCNN_Tensorflow_Docker
 
-MaskRCNN (Tensorflow) using Docker.
+Integration of [FastMaskRCNN] + [Tensorflow] + [Nvidia-docker].
 
   - Install docker
   - Install docker image of [Tensorflow] / [Tensorflow_gpu]
