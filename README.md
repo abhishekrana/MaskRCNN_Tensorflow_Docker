@@ -22,6 +22,11 @@ $ sudo docker exec -it maskrcnn bash
 $ cd /home/maskrcnn/FastMaskRCNN
 ```
 
+# Notes
+
+  - FasterMaskRCNN code (inside docker container) is present at /home/maskrcnn/
+  - FasterMaskRCNN code + Training/Testing data/results (inside docker container) is persisted at MaskRCNN_Tensorflow_Docker/maskrcnn (host)
+
 
 # Acknowledgment
 - [FastMaskRCNN]

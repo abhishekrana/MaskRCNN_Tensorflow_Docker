@@ -11,6 +11,7 @@ TENSORFLOW_TYPE='cpu'
 IMAGE_ID='gcr.io/tensorflow/tensorflow'
 DOCKER='docker'
 SCRIPT_NAME='maskRCNN.sh'
+HOST_PERSISTENT_DATA_PATH=$(pwd)/$CONTAINER_NAME
 
 
 ### FUNCTIONS
@@ -77,8 +78,11 @@ function setup_docker_env(){
 	sudo $DOCKER stop $CONTAINER_NAME
 	sudo $DOCKER rm $CONTAINER_NAME
 
+	mkdir -p $HOST_PERSISTENT_DATA_PATH
+	echo $HOST_PERSISTENT_DATA_PATH
+
 	# Create docker container
-	sudo $DOCKER run -d -v maskrcnn:$DCR_ROOT_PATH --name $CONTAINER_NAME $IMAGE_ID
+	sudo $DOCKER run -d -v $HOST_PERSISTENT_DATA_PATH:$DCR_ROOT_PATH --name $CONTAINER_NAME $IMAGE_ID
 
 	# Install dependencies
 	sudo $DOCKER exec -it $CONTAINER_NAME apt-get update
