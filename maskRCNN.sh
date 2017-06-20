@@ -2,33 +2,24 @@
 
 # Script to create and compile FastMaskRCNN code
 
-### Cleanup
-#rm -rf FastMaskRCNN
-
-
-### Some dependencies (Python 2.7)
-# use 'sudo pip' if installing globally
-#pip install sklearn
-pip install future
-pip install Cython
-pip install scikit-image
+### GLOBALS
+DCR_ROOT_PATH=/home/maskrcnn/
+DCR_MASKRCNN_PATH=$DCR_ROOT_PATH/FastMaskRCNN/
 
 
 ### MaskRCNN
-cd /home/maskrcnn
+# cd $DCR_ROOT_PATH
 # git clone https://github.com/CharlesShang/FastMaskRCNN
-cd FastMaskRCNN
-
-
-### Prerequisite
-cd ./libs/datasets/pycocotools
-make
-cd ../../..
-
-### Create directory structure
 # mkdir -p data/coco
 # mkdir -p data/pretrained_models
 # mkdir -p output/mask_rcnn
+
+
+### Prerequisite
+cd $DCR_MASKRCNN_PATH
+cd ./libs/datasets/pycocotools
+make
+cd ../../..
 
 
 ### Download models
@@ -38,6 +29,7 @@ if [ ! -f "resnet_v1_50_2016_08_28.tar.gz" ];then
 fi
 tar -xzvf resnet_v1_50_2016_08_28.tar.gz
 cd ../..
+
 
 ### Download dataset
 cd data/coco
@@ -63,6 +55,7 @@ fi
 unzip captions_train-val2014.zip
 cd ../..
 
+
 ### Generation annotations
 python download_and_convert_data.py
 
@@ -71,6 +64,7 @@ python download_and_convert_data.py
 cd libs
 make
 cd ..
+
 
 ### Train
 python train/train.py
