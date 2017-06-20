@@ -15,7 +15,7 @@ MaskRCNN (Tensorflow) using Docker.
 # Installation
 ```sh
 $ cd MaskRCNN_Tensorflow_Docker
-$ ./install
+$ ./install.sh
 
 
 $ sudo docker exec -it maskrcnn bash
