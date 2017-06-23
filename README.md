@@ -22,10 +22,10 @@ $ cd MaskRCNN_Tensorflow_Docker
 $ ./install.sh
 
 Training with CPU:
-$ sudo nvidia-docker exec -it maskrcnn bash -c "cd /home/maskrcnn//FastMaskRCNN/; export CUDA_VISIBLE_DEVICES= ; python train/train.py"
+$ sudo nvidia-docker exec -it maskrcnn bash -c "cd /home/maskrcnn/FastMaskRCNN/; export CUDA_VISIBLE_DEVICES= ; python train/train.py"
 
 Training with GPU:
-$ sudo nvidia-docker exec -it maskrcnn bash -c "cd /home/maskrcnn//FastMaskRCNN/; python train/train.py"
+$ sudo nvidia-docker exec -it maskrcnn bash -c "cd /home/maskrcnn/FastMaskRCNN/; python train/train.py"
 ```
 
 # Notes
