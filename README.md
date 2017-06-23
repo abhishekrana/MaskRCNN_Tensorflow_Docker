@@ -1,6 +1,6 @@
 # MaskRCNN_Tensorflow_Docker
 
-Integration of [FastMaskRCNN] + [Tensorflow] + [Nvidia-docker]. (Tested only in Ubuntu 16.04)
+Integration of [FastMaskRCNN] + [Tensorflow] + [Nvidia-docker]. (Tested in Ubuntu 16.04)
 
   - Creates docker image "tensorflow_maskrcnn_gpu" using [Tensorflow_gpu] + [FastMaskRCNN] dependencies
   - Creates docker container "maskrcnn" from "tensorflow_maskrcnn_gpu"
@@ -25,6 +25,9 @@ Training
 $ sudo nvidia-docker exec -it maskrcnn bash -c "cd /home/maskrcnn//FastMaskRCNN/; python train/train.py"
 ```
 
+# Notes
+  - Using Tensorflow 1.1 (due to issue [#88] with TF 1.2)
+
 # Acknowledgment
 - [FastMaskRCNN]
 - [Tensorflow]
@@ -37,4 +40,5 @@ $ sudo nvidia-docker exec -it maskrcnn bash -c "cd /home/maskrcnn//FastMaskRCNN/
 [Tensorflow]: https://github.com/tensorflow/tensorflow/tree/master/tensorflow/tools/docker
 [Tensorflow_gpu]: https://github.com/tensorflow/tensorflow/tree/master/tensorflow/tools/docker
 [Nvidia-docker]: https://github.com/NVIDIA/nvidia-docker
+[#88]: https://github.com/CharlesShang/FastMaskRCNN/issues/88
 
