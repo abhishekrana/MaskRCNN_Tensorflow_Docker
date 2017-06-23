@@ -9,7 +9,7 @@ DCR_MASKRCNN_PATH=$DCR_ROOT_PATH/FastMaskRCNN/
 REPO_NAME='tensorflow_maskrcnn_gpu'
 CONTAINER_NAME='maskrcnn'
 TENSORFLOW_TYPE='gpu'
-DOCKER='docker'
+DOCKER='nvidia-docker'
 DOCKER_FILE='Dockerfile_gpu'
 HOST_PERSISTENT_DATA_PATH=$(pwd)/FastMaskRCNN
 

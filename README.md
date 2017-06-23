@@ -21,9 +21,8 @@ Integration of [FastMaskRCNN] + [Tensorflow] + [Nvidia-docker].
 $ cd MaskRCNN_Tensorflow_Docker
 $ ./install.sh
 
-Enter docker container:
-$ sudo nvidia-docker exec -it maskrcnn bash
-$ cd /home/maskrcnn/FastMaskRCNN
+Training
+$ sudo nvidia-docker exec -it maskrcnn bash -c "cd /home/maskrcnn//FastMaskRCNN/; python train/train.py"
 ```
 
 # Acknowledgment
