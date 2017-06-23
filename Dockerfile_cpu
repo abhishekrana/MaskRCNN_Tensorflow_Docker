@@ -1,0 +1,23 @@
+FROM gcr.io/tensorflow/tensorflow:1.1.0
+
+ENV HOME /home/maskrcnn
+
+# Install dependencies
+RUN apt-get update && apt-get install -y \
+	git \
+    wget \
+	python-tk \
+	locate \
+	ctags \
+	vim
+
+RUN pip install \
+	future \
+	Cython \
+	opencv-python \
+	scikit-image
+
+RUN mkdir -p /home/maskrcnn/FastMaskRCNN/
+
+#WORKDIR /home/maskrcnn/FastMaskRCNN/
+

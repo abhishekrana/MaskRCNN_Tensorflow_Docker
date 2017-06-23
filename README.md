@@ -2,14 +2,18 @@
 
 Integration of [FastMaskRCNN] + [Tensorflow] + [Nvidia-docker].
 
-  - Install docker
-  - Install docker image of [Tensorflow] / [Tensorflow_gpu]
-  - Create docker container "maskrcnn" from [Tensorflow] / [Tensorflow_gpu]
-  - Clone [FastMaskRCNN] code in "maskrcnn" container
-  - Download/copy datasets required for [FastMaskRCNN] code in "maskrcnn" container
-  - Run [FastMaskRCNN] code:
+  - Creates docker image "tensorflow_maskrcnn_gpu" using [Tensorflow_gpu] + [FastMaskRCNN] dependencies
+  - Creates docker container "maskrcnn" from "tensorflow_maskrcnn_gpu"
+  - Clones [FastMaskRCNN] code inside MaskRCNN_Tensorflow_Docker (host) and mounts it inside "maskrcnn" at /home/maskrcnn/FastMaskRCNN (docker).
+    (Host and Docker are now sharing the same code i.e. FastMaskRCNN. So code changes can be made at host side and code can be run inside the docker container)
+  - Downloads/Copies datasets required for [FastMaskRCNN] inside FastMaskRCNN (host/docker)
+  - Runs [FastMaskRCNN] code to:
     - Generate annotations
     - Train the network
+
+
+# Prerequisite
+  - Install Docker
 
 
 # Installation
@@ -17,22 +21,15 @@ Integration of [FastMaskRCNN] + [Tensorflow] + [Nvidia-docker].
 $ cd MaskRCNN_Tensorflow_Docker
 $ ./install.sh
 
-
-$ sudo docker exec -it maskrcnn bash
+Enter docker container:
+$ sudo nvidia-docker exec -it maskrcnn bash
 $ cd /home/maskrcnn/FastMaskRCNN
 ```
-
-# Notes
-
-  - FasterMaskRCNN code (inside docker container) is present at /home/maskrcnn/
-  - /home/maskrcnn (inside docker container) is persisted at MaskRCNN_Tensorflow_Docker/maskrcnn (host)
-
 
 # Acknowledgment
 - [FastMaskRCNN]
 - [Tensorflow]
 - [Nvidia-docker]
-
 
 
 

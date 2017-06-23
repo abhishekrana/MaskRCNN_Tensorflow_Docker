@@ -6,16 +6,18 @@
 ### GLOBALS
 DCR_ROOT_PATH=/home/maskrcnn/
 DCR_MASKRCNN_PATH=$DCR_ROOT_PATH/FastMaskRCNN/
+REPO_NAME='tensorflow_maskrcnn_gpu'
 CONTAINER_NAME='maskrcnn'
-TENSORFLOW_TYPE='cpu'
-IMAGE_ID='gcr.io/tensorflow/tensorflow'
+TENSORFLOW_TYPE='gpu'
 DOCKER='docker'
-SCRIPT_NAME='maskRCNN.sh'
-HOST_PERSISTENT_DATA_PATH=$(pwd)/$CONTAINER_NAME
+DOCKER_FILE='Dockerfile_gpu'
+HOST_PERSISTENT_DATA_PATH=$(pwd)/FastMaskRCNN
 
 
 ### FUNCTIONS
 function install_docker(){
+
+	echo "### install_docker ###"
 
 	echo "Installing/Updating Docker"
 	sudo apt-get remove docker docker-engine
@@ -45,22 +47,25 @@ function install_docker(){
 }
 
 
-function setup_docker_env(){
+function setup_docker_image(){
+
+	echo "### setup_docker_image ###"
 
 	echo "Installing Docker Tensorflow $TENSORFLOW_TYPE"
 
 	if [[ $1 == 'cpu' ]];then
+		# TODO
 		DOCKER='docker'
-		IMAGE_ID='gcr.io/tensorflow/tensorflow'
-		#IMAGE_ID=5f86ff0436e8
+		REPO_NAME='tensorflow_maskrcnn_cpu'
+		DOCKER_FILE='Dockerfile_cpu'
 
 		# Run non-GPU container using
 		sudo docker pull gcr.io/tensorflow/tensorflow
 
 	elif [[ $1 == 'gpu' ]];then
 		DOCKER='nvidia-docker'
-		IMAGE_ID='gcr.io/tensorflow/tensorflow:latest-gpu'
-		#IMAGE_ID=85c8f551e1d2
+		REPO_NAME='tensorflow_maskrcnn_gpu'
+		DOCKER_FILE='Dockerfile_gpu'
 
 		# Install nvidia-docker and nvidia-docker-plugin
 		wget -P /tmp https://github.com/NVIDIA/nvidia-docker/releases/download/v1.0.1/nvidia-docker_1.0.1-1_amd64.deb
@@ -77,60 +82,115 @@ function setup_docker_env(){
 
 	sudo $DOCKER stop $CONTAINER_NAME
 	sudo $DOCKER rm $CONTAINER_NAME
+	sudo $DOCKER rmi $REPO_NAME
 
-	mkdir -p $HOST_PERSISTENT_DATA_PATH
-	echo $HOST_PERSISTENT_DATA_PATH
 
-	# Create docker container
-	sudo $DOCKER run -d -v $HOST_PERSISTENT_DATA_PATH:$DCR_ROOT_PATH --name $CONTAINER_NAME $IMAGE_ID
-
-	# Install dependencies
-	sudo $DOCKER exec -it $CONTAINER_NAME apt-get update
-	sudo $DOCKER exec -it $CONTAINER_NAME apt-get -y install git
-	sudo $DOCKER exec -it $CONTAINER_NAME apt-get -y install wget
-	sudo $DOCKER exec -it $CONTAINER_NAME apt-get -y install python-tk
-	sudo $DOCKER exec -it $CONTAINER_NAME mkdir -p $DCR_ROOT_PATH
-	sudo $DOCKER exec -it $CONTAINER_NAME pip install future
-	sudo $DOCKER exec -it $CONTAINER_NAME pip install Cython
-	sudo $DOCKER exec -it $CONTAINER_NAME pip install scikit-image
-
+	# Create Docker Image
+	echo "Generating Docker image using $DOCKER_FILE "
+	sudo $DOCKER build -f $DOCKER_FILE -t $REPO_NAME .
 
 }
+
+
+function setup_docker_container(){
+
+	echo "### setup_docker_container ###"
+
+	if [[ $1 == 'cpu' ]];then
+		DOCKER='docker'
+		REPO_NAME='tensorflow_maskrcnn_cpu'
+
+	elif [[ $1 == 'gpu' ]];then
+		DOCKER='nvidia-docker'
+		REPO_NAME='tensorflow_maskrcnn_gpu'
+	fi
+
+	sudo $DOCKER rm -f $CONTAINER_NAME
+	mkdir -p $HOST_PERSISTENT_DATA_PATH
+
+	sudo $DOCKER run -d -v $HOST_PERSISTENT_DATA_PATH:$DCR_MASKRCNN_PATH --name $CONTAINER_NAME $REPO_NAME
+
+}
+
 
 function setup_maskrcnn(){
 
+	echo "### setup_maskrcnn ###"
 
-	sudo $DOCKER exec -it $CONTAINER_NAME rm -rf $DCR_ROOT_PATH/FastMaskRCNN
-	sudo $DOCKER exec -it $CONTAINER_NAME git clone https://github.com/CharlesShang/FastMaskRCNN $DCR_ROOT_PATH/FastMaskRCNN
+	# Download code
+	# Cannot remove FastMaskRCNN directorey as we have mounted FastMaskRCNN in docker container
+	git clone https://github.com/CharlesShang/FastMaskRCNN /tmp/FastMaskRCNN
+	rm -rf FastMaskRCNN/*
+	mv /tmp/FastMaskRCNN/* FastMaskRCNN/
+	rm -rf /tmp/FastMaskRCNN
 
-	sudo $DOCKER exec -it $CONTAINER_NAME mkdir -p $DCR_MASKRCNN_PATH/data/coco
-	sudo $DOCKER exec -it $CONTAINER_NAME mkdir -p $DCR_MASKRCNN_PATH/data/pretrained_models
-	sudo $DOCKER exec -it $CONTAINER_NAME mkdir -p $DCR_MASKRCNN_PATH/output/mask_rcnn
+
+	### Prerequisite
+	sudo $DOCKER exec -it $CONTAINER_NAME bash -c "cd $DCR_MASKRCNN_PATH/libs/datasets/pycocotools; make"
+
+	cd FastMaskRCNN
+	mkdir -p data/coco
+	mkdir -p data/pretrained_models
+	mkdir -p output/mask_rcnn
 
 
+	# Download models
 	if [[ -n ${RESNET50_DATASET_PATH} ]];then
-		echo "Copying resnet_v1_50_2016_08_28.tar.gz in container"
-		sudo $DOCKER cp $RESNET50_DATASET_PATH/resnet_v1_50_2016_08_28.tar.gz $CONTAINER_NAME:"$DCR_ROOT_PATH""FastMaskRCNN/data/pretrained_models"
-
+		echo "Copying resnet_v1_50_2016_08_28.tar.gz"
+		cp $RESNET50_DATASET_PATH/resnet_v1_50_2016_08_28.tar.gz data/pretrained_models/
 	fi
 
+	cd data/pretrained_models
+	wget -nc http://download.tensorflow.org/models/resnet_v1_50_2016_08_28.tar.gz
+	tar -xzvf resnet_v1_50_2016_08_28.tar.gz
+	cd ../..
+
+
+	# Download dataset
 	if [[ -n ${COCO_DATASET_PATH} ]];then
-		echo "Copying COCO Dataset in container"
-		sudo $DOCKER cp "$COCO_DATASET_PATH""/train2014.zip" $CONTAINER_NAME:"$DCR_ROOT_PATH""FastMaskRCNN/data/coco"
-		sudo $DOCKER cp "$COCO_DATASET_PATH""/val2014.zip" $CONTAINER_NAME:"$DCR_ROOT_PATH""FastMaskRCNN/data/coco"
-		sudo $DOCKER cp "$COCO_DATASET_PATH""/instances_train-val2014.zip" $CONTAINER_NAME:"$DCR_ROOT_PATH""FastMaskRCNN/data/coco"
-		sudo $DOCKER cp "$COCO_DATASET_PATH""/person_keypoints_trainval2014.zip" $CONTAINER_NAME:"$DCR_ROOT_PATH""FastMaskRCNN/data/coco"
-		sudo $DOCKER cp "$COCO_DATASET_PATH""/captions_train-val2014.zip" $CONTAINER_NAME:"$DCR_ROOT_PATH""FastMaskRCNN/data/coco"
+		echo "Copying COCO Dataset"
+		cp "$COCO_DATASET_PATH""/train2014.zip" "data/coco/"
+		cp "$COCO_DATASET_PATH""/val2014.zip" "data/coco/"
+		cp "$COCO_DATASET_PATH""/instances_train-val2014.zip" "data/coco/"
+		cp "$COCO_DATASET_PATH""/person_keypoints_trainval2014.zip" "data/coco/"
+		cp "$COCO_DATASET_PATH""/captions_train-val2014.zip" "data/coco/"
 	fi
 
-	sudo $DOCKER cp $SCRIPT_NAME $CONTAINER_NAME:$DCR_ROOT_PATH/FastMaskRCNN/
+	cd data/coco
+	wget -nc http://msvocds.blob.core.windows.net/coco2014/train2014.zip
+	unzip train2014.zip
+	wget -nc http://msvocds.blob.core.windows.net/coco2014/val2014.zip
+	unzip val2014.zip
+	wget -nc http://msvocds.blob.core.windows.net/annotations-1-0-3/instances_train-val2014.zip
+	unzip instances_train-val2014.zip
+	wget -nc http://msvocds.blob.core.windows.net/annotations-1-0-3/person_keypoints_trainval2014.zip
+	unzip person_keypoints_trainval2014.zip
+	wget -nc http://msvocds.blob.core.windows.net/annotations-1-0-3/captions_train-val2014.zip
+	unzip captions_train-val2014.zip
+	cd ../..
 
+
+	### Compile libraries
+	sudo $DOCKER exec -it $CONTAINER_NAME bash -c "cd $DCR_MASKRCNN_PATH/libs; make"
+	
 }
 
 
-function run_maskrcnn(){
+function generate_annotations_maskrcnn(){
 
-	sudo $DOCKER exec $CONTAINER_NAME /bin/bash $DCR_ROOT_PATH/FastMaskRCNN/$SCRIPT_NAME
+	echo "### generate_annotations_maskrcnn ###"
+
+	sudo $DOCKER exec -it $CONTAINER_NAME bash -c "cd $DCR_MASKRCNN_PATH; python download_and_convert_data.py"
+
+}
+
+function train_maskrcnn(){
+
+	echo "### train_maskrcnn ###"
+
+	cd $HOST_PERSISTENT_DATA_PATH
+
+	sudo $DOCKER exec -it $CONTAINER_NAME bash -c "cd $DCR_MASKRCNN_PATH; python train/train.py"
 
 }
 
@@ -139,14 +199,14 @@ function run_maskrcnn(){
 ##### MAIN #####
 
 # DOCKER
-echo -n "Install/Update Docker (Ubuntu 16.04) [y/n] ? "
-read input
-if [[ $input == 'y' ]] || [[ $input == 'Y' ]];then
-	install_docker
-fi
+# echo -n "Install/Update Docker (Ubuntu 16.04) [y/n] ? "
+# read input
+# if [[ $input == 'y' ]] || [[ $input == 'Y' ]];then
+# 	install_docker
+# fi
 
 # RESNET50 DATASET
-echo -n "Enter resnet_v1_50_2016_08_28.tar.gz path starting with / [Example: /home/Downloads] (Press Enter to download): "
+echo -n "Enter resnet_v1_50_2016_08_28.tar.gz ABSOLUTE PATH starting with / [Example: /home/Downloads] (Press Enter to download): "
 read input_resnet50
 if [[ -n ${input_resnet50} ]];then
 	RESNET50_DATASET_PATH=$input_resnet50
@@ -154,7 +214,7 @@ if [[ -n ${input_resnet50} ]];then
 fi
 
 # COCO DATASET
-echo -n "Enter train2014.zip, val2014.zip, instances_train-val2014.zip, person_keypoints_trainval2014.zip and captions_train-val2014.zip  path starting with / [Example: /home/Downloads] (Press Enter to download): "
+echo -n "Enter train2014.zip, val2014.zip, instances_train-val2014.zip, person_keypoints_trainval2014.zip and captions_train-val2014.zip ABSOLUTE PATH starting with / [Example: /home/Downloads] (Press Enter to download): "
 read input_coco
 if [[ -n ${input_coco} ]];then
 	COCO_DATASET_PATH=$input_coco
@@ -162,18 +222,17 @@ if [[ -n ${input_coco} ]];then
 fi
 
 # SETUP DOCKER ENVIRONMENT
-echo -n "Enter Tensorflow type to install [cpu/gpu] ? "
-read input_tf
-if [[ $input_tf == 'cpu' ]] || [[ $input_tf == 'CPU' ]] || [[ $input_tf == 'gpu' ]] || [[ $input_tf == 'GPU' ]];then
-	TENSORFLOW_TYPE=$input_tf
-fi
-setup_docker_env $TENSORFLOW_TYPE
+# echo -n "Enter Tensorflow type to install [cpu/gpu] ? "
+# read input_tf
+# if [[ $input_tf == 'cpu' ]] || [[ $input_tf == 'CPU' ]] || [[ $input_tf == 'gpu' ]] || [[ $input_tf == 'GPU' ]];then
+# 	TENSORFLOW_TYPE=$input_tf
+# fi
 
-# SETUP MASKRCNN ENVIRONMENT
+
+setup_docker_image $TENSORFLOW_TYPE
+setup_docker_container $TENSORFLOW_TYPE
 setup_maskrcnn
-
-# RUN MASKRCNN
-run_maskrcnn
-
+generate_annotations_maskrcnn
+train_maskrcnn
 
 
