@@ -1,6 +1,6 @@
 # MaskRCNN_Tensorflow_Docker
 
-Integration of [FastMaskRCNN] + [Tensorflow] + [Nvidia-docker].
+Integration of [FastMaskRCNN] + [Tensorflow] + [Nvidia-docker]. (Tested only in Ubuntu 16.04)
 
   - Creates docker image "tensorflow_maskrcnn_gpu" using [Tensorflow_gpu] + [FastMaskRCNN] dependencies
   - Creates docker container "maskrcnn" from "tensorflow_maskrcnn_gpu"
