@@ -190,6 +190,12 @@ function train_maskrcnn(){
 
 	cd $HOST_PERSISTENT_DATA_PATH
 
+	echo "Command for training with CPU"
+	echo "sudo $DOCKER exec -it $CONTAINER_NAME bash -c \"cd $DCR_MASKRCNN_PATH; export CUDA_VISIBLE_DEVICES= ; python train/train.py\""
+	#sudo $DOCKER exec -it $CONTAINER_NAME bash -c "cd $DCR_MASKRCNN_PATH; export CUDA_VISIBLE_DEVICES= ; python train/train.py"
+
+	echo "Command for training with GPU"
+	echo "sudo $DOCKER exec -it $CONTAINER_NAME bash -c \"cd $DCR_MASKRCNN_PATH; python train/train.py\""
 	sudo $DOCKER exec -it $CONTAINER_NAME bash -c "cd $DCR_MASKRCNN_PATH; python train/train.py"
 
 }
@@ -212,9 +218,11 @@ if [[ -n ${input_resnet50} ]];then
 	RESNET50_DATASET_PATH=$input_resnet50
 	echo "RESNET50 Dataset Path: $RESNET50_DATASET_PATH"
 fi
+echo ""
 
 # COCO DATASET
-echo -n "Enter train2014.zip, val2014.zip, instances_train-val2014.zip, person_keypoints_trainval2014.zip and captions_train-val2014.zip ABSOLUTE PATH starting with / [Example: /home/Downloads] (Press Enter to download): "
+echo "Enter train2014.zip, val2014.zip, instances_train-val2014.zip, person_keypoints_trainval2014.zip and captions_train-val2014.zip"
+echo -n "ABSOLUTE PATH starting with / [Example: /home/Downloads] (Press Enter to download): "
 read input_coco
 if [[ -n ${input_coco} ]];then
 	COCO_DATASET_PATH=$input_coco
@@ -229,10 +237,10 @@ fi
 # fi
 
 
-setup_docker_image $TENSORFLOW_TYPE
-setup_docker_container $TENSORFLOW_TYPE
-setup_maskrcnn
-generate_annotations_maskrcnn
+# setup_docker_image $TENSORFLOW_TYPE
+# setup_docker_container $TENSORFLOW_TYPE
+# setup_maskrcnn
+# generate_annotations_maskrcnn
 train_maskrcnn
 
 
