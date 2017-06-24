@@ -30,6 +30,12 @@ $ sudo nvidia-docker exec -it maskrcnn bash -c "cd /home/maskrcnn/FastMaskRCNN/;
 
 # Notes
   - Using Tensorflow 1.1 (due to issue [#88] with TF 1.2)
+  - Tested on
+    - Ubuntu 	16.04.1	x86_64
+    - Kernel	4.8.0-56-generic
+    - Cuda 	  8.0.61
+    - CuDNN	  5.1.10
+
 
 # Acknowledgment
 - [FastMaskRCNN]
