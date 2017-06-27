@@ -1,6 +1,6 @@
 FROM gcr.io/tensorflow/tensorflow:1.1.0-gpu
 
-ENV HOME /home/maskrcnn
+ENV HOME /home/user
 
 # Install dependencies
 RUN apt-get update && apt-get install -y \
@@ -9,15 +9,21 @@ RUN apt-get update && apt-get install -y \
 	python-tk \
 	locate \
 	ctags \
-	vim
+	vim \
+	tree \
+	protobuf-compiler \
+	python-pil \
+	python-lxml
 
 RUN pip install \
 	future \
 	Cython \
 	opencv-python \
-	scikit-image
+	scikit-image \
+	keras
 
-RUN mkdir -p /home/maskrcnn/FastMaskRCNN/
 
-#WORKDIR /home/maskrcnn/FastMaskRCNN/
+RUN mkdir -p /home/user/
+
+WORKDIR /home/user
 
