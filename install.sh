@@ -237,10 +237,10 @@ fi
 # fi
 
 
-# setup_docker_image $TENSORFLOW_TYPE
-# setup_docker_container $TENSORFLOW_TYPE
-# setup_maskrcnn
-# generate_annotations_maskrcnn
+setup_docker_image $TENSORFLOW_TYPE
+setup_docker_container $TENSORFLOW_TYPE
+setup_maskrcnn
+generate_annotations_maskrcnn
 train_maskrcnn
 
 
