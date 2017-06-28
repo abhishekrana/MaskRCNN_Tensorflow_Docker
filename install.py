@@ -76,7 +76,8 @@ def setup_maskrcnn(container_name, project_name, repo_link, repo_name, resnet50_
 
     if delete_old_repo is 'y':
         cmd_cont='rm -rf ' + project_name + '/*'
-        cmd_host(cmd_cont)
+        cmd_container(container_name, cmd_cont)
+        #cmd_host(cmd_cont)
 
 
     # Don't remove project_name directory as it is mounted inside docker
@@ -168,10 +169,11 @@ def cmd_container(container_name, cmd_cont):
 ### GLOBALS
 DOCKER="nvidia-docker"
 
+# Also modify in .dockerignore
 project_name='MRCNN'
 dataset_name='Dataset'
 
-# Also modify the variable in Dockerfile
+# Also modify in Dockerfile
 user='user'
 
 docker_file         = 'dockerfiles/Dockerfile_gpu_tf1.1'
@@ -188,10 +190,11 @@ repo_name           =  repo_link.split("/")[-1]
 resnet50_dataset_path=None
 coco_dataset_path=None
 
-resnet50_dataset_path = input('Enter resnet50_dataset_path: ')
+resnet50_dataset_path = input('Enter resnet_v1_50_2016_08_28.tar.gz ABSOLUTE PATH starting with / [Example: /home/Downloads] (or Press Enter to download): ')
 print('Resnet50 dataset path: ', resnet50_dataset_path)
 
-coco_dataset_path = input('Enter coco_dataset_path: ')
+
+coco_dataset_path = input('Enter train2014.zip, val2014.zip, instances_train-val2014.zip, person_keypoints_trainval2014.zip and \ncaptions_train-val2014.zip ABSOLUTE PATH starting with / [Example: /home/Downloads] (or Press Enter to download): ')
 print('COCO dataset path: ', coco_dataset_path)
 
 delete_old_repo = input('Delete old repository (' + os.getcwd() + '/' +  project_name + '/' + repo_name + '): ')
@@ -201,14 +204,15 @@ print('Delete: ', coco_dataset_path)
 ### FUNCTIONS
 
 # DOCKER
-# setup_docker_image(doc_repo_name, docker_file)
-# setup_docker_container(doc_repo_name, container_name, host_project_path, docker_project_path)
-# setup_dot_files(container_name, user)
+setup_docker_image(doc_repo_name, docker_file)
+setup_docker_container(doc_repo_name, container_name, host_project_path, docker_project_path)
+setup_dot_files(container_name, user)
 
 # MaskRCNN
-# setup_maskrcnn(container_name, project_name, repo_link, repo_name, resnet50_dataset_path, coco_dataset_path, delete_old_repo)
-# generate_annotations_maskrcnn(project_name, repo_name)
+setup_maskrcnn(container_name, project_name, repo_link, repo_name, resnet50_dataset_path, coco_dataset_path, delete_old_repo)
+generate_annotations_maskrcnn(project_name, repo_name)
 train_maskrcnn(container_name, project_name, repo_name)
+
 
 # SUMMARY
 print('\n##################################################')
