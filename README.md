@@ -2,11 +2,12 @@
 
 Integration of [FastMaskRCNN] + [Tensorflow] + [Nvidia-docker]. (Tested in Ubuntu 16.04)
 
-  - Creates docker image "tensorflow_maskrcnn_gpu" using [Tensorflow_gpu] + [FastMaskRCNN] dependencies
-  - Creates docker container "maskrcnn" from "tensorflow_maskrcnn_gpu"
-  - Clones [FastMaskRCNN] code inside MaskRCNN_Tensorflow_Docker (host) and mounts it inside "maskrcnn" container at /home/maskrcnn/FastMaskRCNN (docker).
+  - Creates docker image "user/tensorflow_gpu_mrcnn" using [Tensorflow_gpu] + [FastMaskRCNN] dependencies
+  - Creates docker container "user-mrcnn_tf1.1" from "user/tensorflow_gpu_mrcnn"
+  - Clones [FastMaskRCNN] code inside MaskRCNN_Tensorflow_Docker/MRCNN/ (host)
+  - Mounts MRCNN/ (host) at /home/user/ (docker) inside "user-mrcnn_tf1.1" container.
     (Host and Docker are now sharing the same code i.e. FastMaskRCNN. So code changes can be made at host side and code can be run inside the docker container)
-  - Downloads/Copies datasets required for [FastMaskRCNN] inside FastMaskRCNN (host/docker)
+  - Downloads/Copies datasets required for [FastMaskRCNN] inside FastMaskRCNN (visible at both host and docker due to mounting)
   - Runs [FastMaskRCNN] code to:
     - Generate annotations
     - Train the network
@@ -19,13 +20,13 @@ Integration of [FastMaskRCNN] + [Tensorflow] + [Nvidia-docker]. (Tested in Ubunt
 # Installation
 ```sh
 $ cd MaskRCNN_Tensorflow_Docker
-$ ./install.sh
+$ ./install.py
 
 Training with CPU:
-$ sudo nvidia-docker exec -it maskrcnn bash -c "cd /home/maskrcnn/FastMaskRCNN/; export CUDA_VISIBLE_DEVICES= ; python train/train.py"
+$ sudo nvidia-docker exec -it user-mrcnn_tf1.1 bash -c "cd MRCNN/FastMaskRCNN; export CUDA_VISIBLE_DEVICES= ; python train/train.py"
 
 Training with GPU:
-$ sudo nvidia-docker exec -it maskrcnn bash -c "cd /home/maskrcnn/FastMaskRCNN/; python train/train.py"
+$ sudo nvidia-docker exec -it user-mrcnn_tf1.1 bash -c "cd MRCNN/FastMaskRCNN; python train/train.py"
 ```
 
 # Notes
