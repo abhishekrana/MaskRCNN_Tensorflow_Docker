@@ -67,7 +67,7 @@ def setup_docker_container(doc_repo_name, container_name, host_project_path, doc
     cmd_host('sudo ' + DOCKER + ' rm -f ' + container_name)
     cmd_host('mkdir -p ' + host_project_path)
 
-    cmd_host('sudo ' + DOCKER + ' run -d -v ' + host_project_path + ':' + docker_project_path + ' --name ' + container_name + ' ' + doc_repo_name)
+    cmd_host('sudo ' + DOCKER + ' run -dit -v ' + host_project_path + ':' + docker_project_path + ' --name ' + container_name + ' ' + doc_repo_name + ' /bin/bash')
 
 
 def setup_dot_files(container_name, user):
